@@ -7,6 +7,7 @@ replayManager:
     repository: rophy/prom-replay/replay-manager
     tag: latest
     pullPolicy: IfNotPresent
+  nodeSelector: {}
   resources:
     requests:
       memory: 128Mi
@@ -22,6 +23,8 @@ victoriametrics:
     pullPolicy: IfNotPresent
   retentionPeriod: "30d"
   maxUniqueTimeseries: "1000000"
+  nodeSelector: {}
+  scrapeConfig: {}
   persistence:
     size: 16Gi
   resources:
@@ -39,6 +42,7 @@ minio:
     pullPolicy: IfNotPresent
   rootUser: minioadmin
   rootPassword: minioadmin
+  nodeSelector: {}
   persistence:
     size: 10Gi
   resources:
@@ -51,6 +55,7 @@ grafana:
     repository: grafana/grafana
     tag: "11.6.1"
     pullPolicy: IfNotPresent
+  nodeSelector: {}
   resources:
     requests:
       memory: 128Mi

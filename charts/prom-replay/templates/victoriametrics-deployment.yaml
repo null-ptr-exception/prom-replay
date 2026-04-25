@@ -27,6 +27,9 @@ spec:
           args:
             - --retentionPeriod={{ .Values.victoriametrics.retentionPeriod }}
             - --search.maxUniqueTimeseries={{ .Values.victoriametrics.maxUniqueTimeseries }}
+            {{- if .Values.victoriametrics.scrapeConfig }}
+            - --promscrape.config=/etc/victoriametrics/scrape.yaml
+            {{- end }}
           ports:
             - name: http
               containerPort: 8428
@@ -46,8 +49,22 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /storage
+            {{- if .Values.victoriametrics.scrapeConfig }}
+            - name: scrape-config
+              mountPath: /etc/victoriametrics
+            {{- end }}
           resources:
             {{- toYaml .Values.victoriametrics.resources | nindent 12 }}
+      {{- with .Values.victoriametrics.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if .Values.victoriametrics.scrapeConfig }}
+        - name: scrape-config
+          configMap:
+            name: {{ include "prom-replay.fullname" . }}-victoriametrics-scrape
+        {{- end }}
   volumeClaimTemplates:
     - metadata:
         name: data

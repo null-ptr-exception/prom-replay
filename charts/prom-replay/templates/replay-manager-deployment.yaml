@@ -60,3 +60,7 @@ spec:
             periodSeconds: 10
           resources:
             {{- toYaml .Values.replayManager.resources | nindent 12 }}
+      {{- with .Values.replayManager.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
