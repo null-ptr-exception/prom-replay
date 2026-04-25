@@ -37,12 +37,12 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-minio
+                  name: {{ include "prom-replay.fullname" . }}-minio
                   key: rootUser
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-minio
+                  name: {{ include "prom-replay.fullname" . }}-minio
                   key: rootPassword
             - name: GRAFANA_URL
               value: http://{{ include "prom-replay.fullname" . }}-grafana:80

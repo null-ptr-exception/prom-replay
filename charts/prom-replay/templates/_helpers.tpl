@@ -32,9 +32,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{- define "prom-replay.vmURL" -}}
-http://{{ .Release.Name }}-victoria-metrics-single-server:8428
+http://{{ include "prom-replay.fullname" . }}-victoriametrics:8428
 {{- end }}
 
 {{- define "prom-replay.minioEndpoint" -}}
-{{ .Release.Name }}-minio:9000
+{{ include "prom-replay.fullname" . }}-minio:9000
 {{- end }}

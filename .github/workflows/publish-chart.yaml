@@ -22,9 +22,6 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-      - name: Update chart dependencies
-        run: helm dependency update ${{ env.CHART_PATH }}
-
       - name: Package chart
         run: helm package ${{ env.CHART_PATH }} -d /tmp/charts
 

@@ -45,9 +45,6 @@ if [ "$SKIP_SETUP" = "false" ]; then
     echo "==> Loading images into kind"
     kind load docker-image "$REPLAY_MANAGER_IMAGE" --name "$CLUSTER_NAME"
 
-    echo "==> Updating Helm dependencies"
-    helm dependency update "$CHART_DIR"
-
     echo "==> Installing Helm chart"
     kubectl create namespace "$NAMESPACE" --context "kind-${CLUSTER_NAME}" 2>/dev/null || true
     helm upgrade --install "$RELEASE_NAME" "$CHART_DIR" \
@@ -76,7 +73,7 @@ kubectl port-forward "svc/${RELEASE_NAME}-prom-replay-replay-manager" "${REPLAY_
     --context "kind-${CLUSTER_NAME}" &
 echo $! >> /tmp/prom-replay-e2e-pf.pid
 
-kubectl port-forward "svc/${RELEASE_NAME}-victoria-metrics-single-server" "${VM_PORT}:8428" \
+kubectl port-forward "svc/${RELEASE_NAME}-prom-replay-victoriametrics" "${VM_PORT}:8428" \
     -n "$NAMESPACE" \
     --context "kind-${CLUSTER_NAME}" &
 echo $! >> /tmp/prom-replay-e2e-pf.pid

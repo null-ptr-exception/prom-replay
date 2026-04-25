@@ -14,23 +14,33 @@ replayManager:
     limits:
       memory: 512Mi
 
-dashboards:
-  maxSizeBytes: 1048576
-
-victoria-metrics-single:
-  server:
-    retentionPeriod: "30d"
-    extraArgs:
-      search.maxUniqueTimeseries: "1000000"
+victoriametrics:
+  image:
+    registry: docker.io
+    repository: victoriametrics/victoria-metrics
+    tag: v1.106.1
+    pullPolicy: IfNotPresent
+  retentionPeriod: "30d"
+  maxUniqueTimeseries: "1000000"
+  persistence:
+    size: 16Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
 
 minio:
-  mode: standalone
-  replicas: 1
+  image:
+    registry: quay.io
+    repository: minio/minio
+    tag: RELEASE.2024-12-18T13-15-44Z
+    pullPolicy: IfNotPresent
+  rootUser: minioadmin
+  rootPassword: minioadmin
   persistence:
     size: 10Gi
-  buckets:
-    - name: prom-replay
-      policy: none
   resources:
     requests:
       memory: 256Mi
@@ -49,3 +59,6 @@ grafana:
       memory: 256Mi
   extraVolumes: []
   extraVolumeMounts: []
+
+dashboards:
+  maxSizeBytes: 1048576

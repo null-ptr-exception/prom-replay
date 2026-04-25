@@ -24,7 +24,6 @@ See [docs/solution-overview.md](docs/solution-overview.md) for full design detai
 Install the Helm chart:
 
 ```bash
-helm dependency update charts/prom-replay
 helm install prom-replay charts/prom-replay --namespace prom-replay --create-namespace
 ```
 

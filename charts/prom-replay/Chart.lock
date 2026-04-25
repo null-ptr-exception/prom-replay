@@ -1,9 +1,0 @@
-dependencies:
-- name: victoria-metrics-single
-  repository: https://victoriametrics.github.io/helm-charts/
-  version: 0.12.7
-- name: minio
-  repository: https://charts.min.io/
-  version: 5.4.0
-digest: sha256:04ba87cafafe3d8659cbc60c64001ca994cb017bb6d5a8dbba8e79430d2d4924
-generated: "2026-04-25T07:23:04.302453167Z"
