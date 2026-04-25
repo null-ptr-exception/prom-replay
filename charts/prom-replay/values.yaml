@@ -32,6 +32,10 @@ minio:
       memory: 256Mi
 
 grafana:
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
   sidecar:
     dashboards:
       enabled: true
