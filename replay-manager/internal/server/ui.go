@@ -40,7 +40,7 @@ var uiTmpl = template.Must(template.New("ui").Funcs(template.FuncMap{
   body { font-family: Inter, -apple-system, sans-serif; background: #181b1f; color: #d8d9da; font-size: 13px; padding: 16px; }
   h2 { font-size: 16px; font-weight: 500; margin: 20px 0 10px 0; color: #d8d9da; }
   h2:first-of-type { margin-top: 0; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
   th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #2c3035; }
   th { color: #8e8e8e; font-weight: 500; font-size: 12px; }
   tr:hover { background: #22252a; }
@@ -60,11 +60,13 @@ var uiTmpl = template.Must(template.New("ui").Funcs(template.FuncMap{
   .msg-ok { background: #1a3a1a; color: #73bf69; }
   .msg-err { background: #3a1a1a; color: #f2495c; }
   .run-selected { background: #1f3a5f; }
+  .run-link { color: #6e9fff; text-decoration: underline; text-underline-offset: 2px; }
+  .run-link:hover { color: #8ab8ff; }
+  .hint { font-size: 12px; color: #5a5a5a; padding: 4px 12px; }
   a.dashboard-link { display: inline-block; padding: 6px 14px; border-radius: 4px; font-size: 13px; color: #6e9fff; text-decoration: none; background: #1a2332; margin: 0 6px 6px 0; }
   a.dashboard-link:hover { background: #1f3a5f; color: #8ab8ff; }
   .dashboard-list { display: flex; flex-wrap: wrap; padding: 4px 0; }
-  .hint { font-size: 12px; color: #8e8e8e; margin-bottom: 8px; }
-  .no-selection { color: #5a5a5a; }
+  .dashboard-info { font-size: 12px; color: #8e8e8e; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -76,7 +78,7 @@ var uiTmpl = template.Must(template.New("ui").Funcs(template.FuncMap{
 <tbody>
 {{range .Runs}}
 <tr{{if eq .RunID $.SelectedRun}} class="run-selected"{{end}}>
-  <td><a href="?run={{.RunID}}" style="color:#6e9fff;">{{.RunID}}</a></td>
+  <td><a class="run-link" href="?run={{.RunID}}">&#9654; {{.RunID}}</a></td>
   <td>{{.Start.Format "2006-01-02 15:04:05"}}</td>
   <td>{{.End.Format "2006-01-02 15:04:05"}}</td>
   <td>{{.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
@@ -91,13 +93,14 @@ var uiTmpl = template.Must(template.New("ui").Funcs(template.FuncMap{
 {{end}}
 </tbody>
 </table>
+{{if not .SelectedRun}}<div class="hint">Click a run ID to view dashboards.</div>{{end}}
 {{else}}
 <div class="status">No runs found.</div>
 {{end}}
 
-<h2>Dashboards</h2>
 {{if .SelectedRun}}
-<div class="hint">Viewing dashboards for run <strong>{{.SelectedRun}}</strong> ({{.SelectedStart}} — {{.SelectedEnd}})</div>
+<h2>Dashboards</h2>
+<div class="dashboard-info">Run <strong>{{.SelectedRun}}</strong> &mdash; {{.SelectedStart}} to {{.SelectedEnd}}</div>
 {{if .Dashboards}}
 <div class="dashboard-list">
 {{range .Dashboards}}
@@ -107,8 +110,6 @@ var uiTmpl = template.Must(template.New("ui").Funcs(template.FuncMap{
 {{else}}
 <div class="status">No dashboards found.</div>
 {{end}}
-{{else}}
-<div class="hint no-selection">Select a run above to see available dashboards.</div>
 {{end}}
 
 </body>
