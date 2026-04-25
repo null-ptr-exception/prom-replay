@@ -4,7 +4,6 @@ metadata:
   name: {{ include "prom-replay.fullname" . }}-grafana-datasource
   labels:
     {{- include "prom-replay.labels" . | nindent 4 }}
-    grafana_datasource: "1"
 data:
   datasource.yaml: |-
     apiVersion: 1
@@ -14,3 +13,9 @@ data:
         url: {{ include "prom-replay.vmURL" . }}
         access: proxy
         isDefault: true
+      - name: ReplayManager
+        type: yesoreyeram-infinity-datasource
+        url: http://{{ include "prom-replay.fullname" . }}-replay-manager:8080
+        access: proxy
+        jsonData:
+          global_queries: []

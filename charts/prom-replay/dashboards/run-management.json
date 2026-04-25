@@ -7,7 +7,10 @@
   "links": [],
   "panels": [
     {
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${infinity_ds}"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -22,27 +25,58 @@
             "properties": [
               {
                 "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
+                "value": { "type": "color-text" }
               },
               {
                 "id": "mappings",
                 "value": [
-                  { "type": "value", "options": { "true": { "text": "Loaded", "color": "green" }, "false": { "text": "Not loaded", "color": "text" } } }
+                  {
+                    "type": "value",
+                    "options": {
+                      "true": { "text": "Yes", "color": "green" },
+                      "false": { "text": "No", "color": "text" }
+                    }
+                  }
                 ]
-              }
+              },
+              { "id": "custom.width", "value": 80 }
             ]
           },
           {
             "matcher": { "id": "byName", "options": "size_bytes" },
             "properties": [
-              { "id": "unit", "value": "decbytes" }
+              { "id": "unit", "value": "decbytes" },
+              { "id": "displayName", "value": "Size" },
+              { "id": "custom.width", "value": 100 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "run_id" },
+            "properties": [
+              { "id": "custom.width", "value": 200 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "start" },
+            "properties": [
+              { "id": "custom.width", "value": 200 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "end" },
+            "properties": [
+              { "id": "custom.width", "value": 200 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "created_at" },
+            "properties": [
+              { "id": "custom.width", "value": 200 }
             ]
           }
         ]
       },
-      "gridPos": { "h": 16, "w": 24, "x": 0, "y": 0 },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
       "id": 1,
       "options": {
         "showHeader": true,
@@ -54,22 +88,114 @@
       "type": "table",
       "targets": [
         {
-          "datasource": { "type": "marcusolsson-json-datasource", "uid": "${json_datasource}" },
-          "refId": "A"
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${infinity_ds}"
+          },
+          "refId": "A",
+          "type": "json",
+          "parser": "backend",
+          "source": "url",
+          "format": "table",
+          "url": "/runs",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            { "selector": "run_id", "text": "run_id", "type": "string" },
+            { "selector": "start", "text": "start", "type": "string" },
+            { "selector": "end", "text": "end", "type": "string" },
+            { "selector": "created_at", "text": "created_at", "type": "string" },
+            { "selector": "size_bytes", "text": "size_bytes", "type": "number" },
+            { "selector": "loaded", "text": "loaded", "type": "boolean" }
+          ]
         }
-      ],
-      "description": "List of archived benchmark runs. Use the Replay Manager API to load/unload runs:\n\n- Load: POST /runs/{id}/load\n- Unload: DELETE /runs/{id}/load\n- Delete: DELETE /runs/{id}"
+      ]
     },
     {
-      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 16 },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 12 },
       "id": 2,
+      "type": "canvas",
+      "title": "Actions",
       "options": {
-        "mode": "markdown",
-        "content": "## Quick Reference\n\n| Action | Command |\n|---|---|\n| Export current run | `curl -X POST http://REPLAY_MANAGER:8080/runs -H 'Content-Type: application/json' -d '{\"start\":\"...\",\"end\":\"...\"}'` |\n| Load a run | `curl -X POST http://REPLAY_MANAGER:8080/runs/<run_id>/load` |\n| Unload a run | `curl -X DELETE http://REPLAY_MANAGER:8080/runs/<run_id>/load` |\n| Delete a run | `curl -X DELETE http://REPLAY_MANAGER:8080/runs/<run_id>` |",
-        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false }
+        "inlineEditing": false,
+        "root": {
+          "background": { "color": { "fixed": "transparent" } },
+          "border": { "color": { "fixed": "dark-green" } },
+          "constraint": { "horizontal": "left", "vertical": "top" },
+          "elements": [
+            {
+              "background": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" },
+              "name": "run_id_label",
+              "placement": { "height": 30, "left": 10, "top": 10, "width": 80 },
+              "type": "text",
+              "config": { "text": { "fixed": "Run ID:" }, "align": "left", "valign": "middle", "size": 14 }
+            },
+            {
+              "background": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" },
+              "name": "run_id_value",
+              "placement": { "height": 30, "left": 90, "top": 10, "width": 250 },
+              "type": "text",
+              "config": { "text": { "fixed": "${run_id_input}" }, "align": "left", "valign": "middle", "size": 14, "color": { "fixed": "#73BF69" } }
+            },
+            {
+              "background": { "color": { "fixed": "#296935" } },
+              "constraint": { "horizontal": "left", "vertical": "top" },
+              "name": "load_button",
+              "placement": { "height": 36, "left": 10, "top": 50, "width": 120 },
+              "type": "button",
+              "config": {
+                "text": "Load Run",
+                "api": {
+                  "endpoint": "/runs/${run_id_input}/load",
+                  "method": "POST",
+                  "contentType": "application/json"
+                },
+                "style": { "variant": "primary" }
+              }
+            },
+            {
+              "background": { "color": { "fixed": "#4a3820" } },
+              "constraint": { "horizontal": "left", "vertical": "top" },
+              "name": "unload_button",
+              "placement": { "height": 36, "left": 140, "top": 50, "width": 120 },
+              "type": "button",
+              "config": {
+                "text": "Unload Run",
+                "api": {
+                  "endpoint": "/runs/${run_id_input}/load",
+                  "method": "DELETE",
+                  "contentType": "application/json"
+                },
+                "style": { "variant": "secondary" }
+              }
+            },
+            {
+              "background": { "color": { "fixed": "#611919" } },
+              "constraint": { "horizontal": "left", "vertical": "top" },
+              "name": "delete_button",
+              "placement": { "height": 36, "left": 270, "top": 50, "width": 120 },
+              "type": "button",
+              "config": {
+                "text": "Delete Run",
+                "api": {
+                  "endpoint": "/runs/${run_id_input}",
+                  "method": "DELETE",
+                  "contentType": "application/json"
+                },
+                "style": { "variant": "destructive" }
+              }
+            }
+          ],
+          "name": "Element group",
+          "type": "frame"
+        }
       },
-      "title": "API Reference",
-      "type": "text"
+      "description": "Enter a run_id from the table above into the Run ID field, then click an action button."
     }
   ],
   "schemaVersion": 39,
@@ -78,25 +204,26 @@
     "list": [
       {
         "current": {},
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
-        "name": "datasource",
+        "name": "infinity_ds",
         "options": [],
-        "query": "prometheus",
+        "query": "yesoreyeram-infinity-datasource",
+        "queryValue": "",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "type": "datasource"
       },
       {
-        "current": {},
+        "current": { "selected": false, "text": "", "value": "" },
         "hide": 0,
-        "includeAll": false,
-        "name": "json_datasource",
-        "options": [],
-        "query": "marcusolsson-json-datasource",
-        "refresh": 1,
-        "regex": "",
-        "type": "datasource"
+        "label": "Run ID",
+        "name": "run_id_input",
+        "options": [{ "selected": true, "text": "", "value": "" }],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
     ]
   },

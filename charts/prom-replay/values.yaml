@@ -32,14 +32,13 @@ minio:
       memory: 256Mi
 
 grafana:
-  grafana.ini:
-    auth.anonymous:
-      enabled: true
-      org_role: Viewer
-  sidecar:
-    dashboards:
-      enabled: true
-      label: grafana_dashboard
-    datasources:
-      enabled: true
-      label: grafana_datasource
+  image:
+    repository: prom-replay/grafana
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi

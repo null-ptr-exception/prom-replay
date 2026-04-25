@@ -1,7 +1,7 @@
 prom-replay has been installed.
 
 Access Grafana:
-  kubectl port-forward svc/{{ .Release.Name }}-grafana 3000:80
+  kubectl port-forward svc/{{ include "prom-replay.fullname" . }}-grafana 3000:80
 
 Access Replay Manager API:
   kubectl port-forward svc/{{ include "prom-replay.fullname" . }}-replay-manager 8080:8080
