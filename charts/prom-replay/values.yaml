@@ -1,6 +1,10 @@
+global:
+  imageRegistry: ""
+
 replayManager:
   image:
-    repository: ghcr.io/rophy/prom-replay/replay-manager
+    registry: ghcr.io
+    repository: rophy/prom-replay/replay-manager
     tag: latest
     pullPolicy: IfNotPresent
   resources:
@@ -33,6 +37,7 @@ minio:
 
 grafana:
   image:
+    registry: docker.io
     repository: grafana/grafana
     tag: "11.6.1"
     pullPolicy: IfNotPresent

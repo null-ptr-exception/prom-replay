@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: replay-manager
-          image: "{{ .Values.replayManager.image.repository }}:{{ .Values.replayManager.image.tag }}"
+          image: {{ include "prom-replay.image" (dict "imageValues" .Values.replayManager.image "global" .Values.global) }}
           imagePullPolicy: {{ .Values.replayManager.image.pullPolicy }}
           ports:
             - name: http

@@ -53,6 +53,7 @@ if [ "$SKIP_SETUP" = "false" ]; then
     helm upgrade --install "$RELEASE_NAME" "$CHART_DIR" \
         --namespace "$NAMESPACE" \
         --kube-context "kind-${CLUSTER_NAME}" \
+        --set replayManager.image.registry="" \
         --set replayManager.image.repository=prom-replay/replay-manager \
         --set replayManager.image.tag=e2e \
         --set replayManager.image.pullPolicy=Never \

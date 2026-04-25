@@ -22,6 +22,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{- define "prom-replay.image" -}}
+{{- $registry := .global.imageRegistry | default .imageValues.registry | default "" -}}
+{{- if $registry -}}
+{{- printf "%s/%s:%s" $registry .imageValues.repository (.imageValues.tag | toString) -}}
+{{- else -}}
+{{- printf "%s:%s" .imageValues.repository (.imageValues.tag | toString) -}}
+{{- end -}}
+{{- end }}
+
 {{- define "prom-replay.vmURL" -}}
 http://{{ .Release.Name }}-victoria-metrics-single-server:8428
 {{- end }}
