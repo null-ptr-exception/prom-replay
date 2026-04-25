@@ -1,0 +1,32 @@
+name: Publish Helm Chart
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  CHART_PATH: charts/prom-replay
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Update chart dependencies
+        run: helm dependency update ${{ env.CHART_PATH }}
+
+      - name: Package chart
+        run: helm package ${{ env.CHART_PATH }} -d /tmp/charts
+
+      - name: Push to GHCR
+        run: helm push /tmp/charts/prom-replay-*.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/prom-replay/charts
