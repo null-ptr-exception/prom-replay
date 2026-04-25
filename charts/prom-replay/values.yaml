@@ -42,3 +42,5 @@ grafana:
       cpu: 100m
     limits:
       memory: 256Mi
+  extraVolumes: []
+  extraVolumeMounts: []

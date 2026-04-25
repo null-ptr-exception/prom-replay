@@ -44,6 +44,9 @@ spec:
               mountPath: /var/lib/grafana/dashboards/{{ $path | base }}
               subPath: {{ $path | base }}
             {{- end }}
+            {{- with .Values.grafana.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /api/health
@@ -72,4 +75,7 @@ spec:
         - name: dashboard-{{ $path | base | trimSuffix ".json" }}
           configMap:
             name: {{ include "prom-replay.fullname" $ }}-{{ $path | base | trimSuffix ".json" }}
+        {{- end }}
+        {{- with .Values.grafana.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
