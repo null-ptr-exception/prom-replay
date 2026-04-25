@@ -9,7 +9,7 @@ A Helm chart deploying four components:
 - **VictoriaMetrics** (single-node) — scrapes live metrics and stores historical runs
 - **MinIO** (single-node) — S3-compatible archive for run exports
 - **Replay Manager** — Go REST API managing the run lifecycle
-- **Grafana** — dashboards with `run_id` template variable for filtering and comparison
+- **Grafana** — dashboards with `run_id` template variable for filtering and comparison, plus a run management dashboard with Infinity datasource for managing runs directly from the UI
 
 See [docs/solution-overview.md](docs/solution-overview.md) for full design details.
 
@@ -20,6 +20,14 @@ See [docs/solution-overview.md](docs/solution-overview.md) for full design detai
 - kubectl
 
 ## Install
+
+Build the custom Grafana image (pre-installs the Infinity datasource plugin for air-gapped support):
+
+```bash
+docker build -t prom-replay/grafana:latest grafana/
+```
+
+Install the Helm chart:
 
 ```bash
 helm dependency update charts/prom-replay
@@ -115,7 +123,7 @@ Key values in `values.yaml`:
 | `victoria-metrics-single.server.retentionPeriod` | `30d` | How long loaded runs stay in VM before disk cleanup |
 | `minio.persistence.size` | `10Gi` | Storage for archived run exports |
 | `dashboards.maxSizeBytes` | `1048576` | Max dashboard JSON size (ConfigMap limit validation) |
-| `grafana.grafana.ini.auth.anonymous.enabled` | `true` | Anonymous read-only access |
+| `grafana.image.repository` | `prom-replay/grafana` | Custom Grafana image with Infinity plugin |
 
 ## Development
 
@@ -133,7 +141,7 @@ Requires: kind, bats, docker, helm, kubectl, jq
 make e2e
 ```
 
-This creates a kind cluster, builds and loads the replay manager image, installs the Helm chart, runs the full lifecycle test suite (15 tests), and tears down.
+This creates a kind cluster, builds and loads the replay manager and custom Grafana images, installs the Helm chart, runs the full lifecycle test suite (15 tests), and tears down.
 
 To keep the cluster alive for debugging:
 
