@@ -92,7 +92,7 @@ func (c *Client) GetData(ctx context.Context, runID string) (io.ReadCloser, erro
 }
 
 func (c *Client) ListRuns(ctx context.Context) ([]model.RunInfo, error) {
-	var runs []model.RunInfo
+	runs := make([]model.RunInfo, 0)
 	seen := make(map[string]bool)
 
 	for obj := range c.mc.ListObjects(ctx, c.bucket, minio.ListObjectsOptions{
