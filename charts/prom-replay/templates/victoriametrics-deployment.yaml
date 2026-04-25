@@ -20,6 +20,9 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: victoriametrics
     spec:
+      {{- if .Values.victoriametrics.scrapeConfig }}
+      serviceAccountName: {{ include "prom-replay.fullname" . }}-victoriametrics
+      {{- end }}
       containers:
         - name: victoriametrics
           image: {{ include "prom-replay.image" (dict "imageValues" .Values.victoriametrics.image "global" .Values.global) }}
