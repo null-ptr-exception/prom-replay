@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "prom-replay.fullname" . }}-replay-manager
+  labels:
+    {{- include "prom-replay.labels" . | nindent 4 }}
+    app.kubernetes.io/component: replay-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "prom-replay.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: replay-manager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "prom-replay.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: replay-manager
+    spec:
+      containers:
+        - name: replay-manager
+          image: "{{ .Values.replayManager.image.repository }}:{{ .Values.replayManager.image.tag }}"
+          imagePullPolicy: {{ .Values.replayManager.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: VM_URL
+              value: {{ include "prom-replay.vmURL" . }}
+            - name: MINIO_ENDPOINT
+              value: {{ include "prom-replay.minioEndpoint" . }}
+            - name: MINIO_BUCKET
+              value: prom-replay
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-minio
+                  key: rootUser
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-minio
+                  key: rootPassword
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.replayManager.resources | nindent 12 }}

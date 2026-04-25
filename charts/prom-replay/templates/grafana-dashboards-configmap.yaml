@@ -1,0 +1,17 @@
+{{- $maxSize := int .Values.dashboards.maxSizeBytes }}
+{{- range $path, $bytes := .Files.Glob "dashboards/*.json" }}
+{{- if gt (len (toString $bytes)) $maxSize }}
+{{- fail (printf "Dashboard %s is %d bytes, exceeding max of %d" $path (len (toString $bytes)) $maxSize) }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "prom-replay.fullname" $ }}-{{ $path | base | trimSuffix ".json" }}
+  labels:
+    {{- include "prom-replay.labels" $ | nindent 4 }}
+    grafana_dashboard: "1"
+data:
+  {{ $path | base }}: |-
+    {{- toString $bytes | nindent 4 }}
+---
+{{- end }}

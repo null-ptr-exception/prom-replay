@@ -1,0 +1,38 @@
+replayManager:
+  image:
+    repository: ghcr.io/rophy/prom-replay/replay-manager
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+
+dashboards:
+  maxSizeBytes: 1048576
+
+victoria-metrics-single:
+  server:
+    retentionPeriod: "30d"
+    extraArgs:
+      search.maxUniqueTimeseries: "1000000"
+
+minio:
+  mode: standalone
+  replicas: 1
+  persistence:
+    size: 10Gi
+  buckets:
+    - name: prom-replay
+      policy: none
+  resources:
+    requests:
+      memory: 256Mi
+
+grafana:
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard

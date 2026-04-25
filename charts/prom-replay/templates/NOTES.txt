@@ -1,0 +1,25 @@
+prom-replay has been installed.
+
+Access Grafana:
+  kubectl port-forward svc/{{ .Release.Name }}-grafana 3000:80
+
+Access Replay Manager API:
+  kubectl port-forward svc/{{ include "prom-replay.fullname" . }}-replay-manager 8080:8080
+
+API usage:
+  # Export a run
+  curl -X POST http://localhost:8080/runs \
+    -H 'Content-Type: application/json' \
+    -d '{"start":"2026-01-01T00:00:00Z","end":"2026-01-01T01:00:00Z"}'
+
+  # List runs
+  curl http://localhost:8080/runs
+
+  # Load a run
+  curl -X POST http://localhost:8080/runs/<run_id>/load
+
+  # Unload a run
+  curl -X DELETE http://localhost:8080/runs/<run_id>/load
+
+  # Delete a run
+  curl -X DELETE http://localhost:8080/runs/<run_id>
