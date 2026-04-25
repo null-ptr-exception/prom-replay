@@ -13,9 +13,3 @@ data:
         url: {{ include "prom-replay.vmURL" . }}
         access: proxy
         isDefault: true
-      - name: ReplayManager
-        type: yesoreyeram-infinity-datasource
-        url: http://{{ include "prom-replay.fullname" . }}-replay-manager:8080
-        access: proxy
-        jsonData:
-          global_queries: []

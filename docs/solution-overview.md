@@ -136,14 +136,10 @@ Pre-configured with a single VictoriaMetrics datasource.
 `run_id` label values) to filter which run(s) to display. Selecting multiple
 `run_id` values enables side-by-side comparison on the same dashboard.
 
-**Run management dashboard** provides a UI for developers to manage runs
-without leaving Grafana:
-- Table listing available runs (from `GET /runs`)
-- Load/unload actions per run
-- Indicator for which runs are currently loaded in VM
-
-This keeps the entire workflow in one tool: open Grafana → load a run → view
-the dashboard.
+**Run management UI** is served by the Replay Manager at `/ui`, providing:
+- Table listing available runs with load/unload/delete actions
+- Dashboard links per run that open Grafana with the correct time range
+- Grafana is reverse-proxied at `/grafana/`, so only one port-forward is needed
 
 **Dashboard provisioning:**
 Dashboards are stored as JSON files in the Helm chart and deployed as
@@ -180,12 +176,13 @@ Test script calls: POST /runs  (start=T0, end=T1, labels={...})
 ### Viewing a historical run
 
 ```
-Developer opens Grafana → Run Management dashboard
+Developer opens Replay Manager UI at /ui
   → Sees list of archived runs
   → Clicks "Load" on a run
   → POST /runs/:id/load
   → Replay Manager imports data into VM with run_id label
-  → Developer switches to metric dashboard
+  → Clicks a dashboard link for the run
+  → Opens Grafana (proxied at /grafana/) with correct time range
   → Selects run_id from dropdown → sees historical metrics
 ```
 

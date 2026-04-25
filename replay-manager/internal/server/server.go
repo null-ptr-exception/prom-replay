@@ -6,6 +6,8 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"time"
 
@@ -15,23 +17,39 @@ import (
 )
 
 type Server struct {
-	vm    *vm.Client
-	minio *minioclient.Client
-	mux   *http.ServeMux
+	vm         *vm.Client
+	minio      *minioclient.Client
+	grafanaURL string
+	mux        *http.ServeMux
 }
 
-func New(vmClient *vm.Client, minioClient *minioclient.Client) *Server {
+func New(vmClient *vm.Client, minioClient *minioclient.Client, grafanaURL string) *Server {
 	s := &Server{
-		vm:    vmClient,
-		minio: minioClient,
-		mux:   http.NewServeMux(),
+		vm:         vmClient,
+		minio:      minioClient,
+		grafanaURL: grafanaURL,
+		mux:        http.NewServeMux(),
 	}
 	s.mux.HandleFunc("GET /healthz", s.handleHealthz)
+	s.mux.HandleFunc("GET /ui", s.handleUI)
+	s.mux.HandleFunc("POST /ui/action", s.handleUIAction)
 	s.mux.HandleFunc("POST /runs", s.handleCreateRun)
 	s.mux.HandleFunc("GET /runs", s.handleListRuns)
 	s.mux.HandleFunc("POST /runs/{id}/load", s.handleLoadRun)
 	s.mux.HandleFunc("DELETE /runs/{id}/load", s.handleUnloadRun)
 	s.mux.HandleFunc("DELETE /runs/{id}", s.handleDeleteRun)
+
+	target, err := url.Parse(grafanaURL)
+	if err != nil {
+		slog.Error("invalid GRAFANA_URL", "error", err)
+	} else {
+		proxy := httputil.NewSingleHostReverseProxy(target)
+		s.mux.HandleFunc("/grafana/", func(w http.ResponseWriter, r *http.Request) {
+			r.Host = target.Host
+			proxy.ServeHTTP(w, r)
+		})
+	}
+
 	return s
 }
 

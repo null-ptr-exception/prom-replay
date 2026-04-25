@@ -9,7 +9,7 @@ A Helm chart deploying four components:
 - **VictoriaMetrics** (single-node) — scrapes live metrics and stores historical runs
 - **MinIO** (single-node) — S3-compatible archive for run exports
 - **Replay Manager** — Go REST API managing the run lifecycle
-- **Grafana** — dashboards with `run_id` template variable for filtering and comparison, plus a run management dashboard with Infinity datasource for managing runs directly from the UI
+- **Grafana** — dashboards with `run_id` template variable for filtering and comparison
 
 See [docs/solution-overview.md](docs/solution-overview.md) for full design details.
 
@@ -21,12 +21,6 @@ See [docs/solution-overview.md](docs/solution-overview.md) for full design detai
 
 ## Install
 
-Build the custom Grafana image (pre-installs the Infinity datasource plugin for air-gapped support):
-
-```bash
-docker build -t prom-replay/grafana:latest grafana/
-```
-
 Install the Helm chart:
 
 ```bash
@@ -37,12 +31,11 @@ helm install prom-replay charts/prom-replay --namespace prom-replay --create-nam
 ## Access
 
 ```bash
-# Grafana (anonymous read-only access enabled by default)
-kubectl port-forward svc/prom-replay-grafana 3000:80 -n prom-replay
-
-# Replay Manager API
+# Replay Manager (includes UI and Grafana proxy)
 kubectl port-forward svc/prom-replay-prom-replay-replay-manager 8080:8080 -n prom-replay
 ```
+
+Open `http://localhost:8080/ui` for the run management UI. Grafana dashboards are proxied at `/grafana/`.
 
 ## Usage
 
@@ -80,7 +73,7 @@ Imports the run into VictoriaMetrics with a `run_id` label. The data becomes que
 
 ### 4. View in Grafana
 
-Open Grafana and navigate to the **Example Metrics** dashboard. Select the `run_id` from the dropdown. Select multiple to compare runs side-by-side.
+In the run management UI, click a run to select it, then click a dashboard link to view it in Grafana with the correct time range. Select multiple `run_id` values in the dashboard dropdown to compare runs side-by-side.
 
 ### 5. Unload a run
 
@@ -123,7 +116,7 @@ Key values in `values.yaml`:
 | `victoria-metrics-single.server.retentionPeriod` | `30d` | How long loaded runs stay in VM before disk cleanup |
 | `minio.persistence.size` | `10Gi` | Storage for archived run exports |
 | `dashboards.maxSizeBytes` | `1048576` | Max dashboard JSON size (ConfigMap limit validation) |
-| `grafana.image.repository` | `prom-replay/grafana` | Custom Grafana image with Infinity plugin |
+| `grafana.image.repository` | `grafana/grafana` | Grafana image |
 
 ## Development
 
@@ -141,7 +134,7 @@ Requires: kind, bats, docker, helm, kubectl, jq
 make e2e
 ```
 
-This creates a kind cluster, builds and loads the replay manager and custom Grafana images, installs the Helm chart, runs the full lifecycle test suite (15 tests), and tears down.
+This creates a kind cluster, builds and loads the replay manager image, installs the Helm chart, runs the full lifecycle test suite (15 tests), and tears down.
 
 To keep the cluster alive for debugging:
 

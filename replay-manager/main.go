@@ -18,6 +18,7 @@ func main() {
 	minioSecretKey := envOr("MINIO_SECRET_KEY", "minioadmin")
 	minioBucket := envOr("MINIO_BUCKET", "prom-replay")
 	listenAddr := envOr("LISTEN_ADDR", ":8080")
+	grafanaURL := envOr("GRAFANA_URL", "http://localhost:3000")
 
 	vmClient := vm.NewClient(vmURL)
 
@@ -32,9 +33,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	srv := server.New(vmClient, mc)
+	srv := server.New(vmClient, mc, grafanaURL)
 
-	slog.Info("starting replay manager", "addr", listenAddr, "vm_url", vmURL, "minio_endpoint", minioEndpoint)
+	slog.Info("starting replay manager", "addr", listenAddr, "vm_url", vmURL, "minio_endpoint", minioEndpoint, "grafana_url", grafanaURL)
 	if err := http.ListenAndServe(listenAddr, srv); err != nil {
 		slog.Error("server failed", "error", err)
 		os.Exit(1)

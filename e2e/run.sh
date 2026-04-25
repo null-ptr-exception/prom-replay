@@ -10,8 +10,6 @@ RELEASE_NAME="${RELEASE_NAME:-pr}"
 CHART_DIR="${ROOT_DIR}/charts/prom-replay"
 REPLAY_MANAGER_DIR="${ROOT_DIR}/replay-manager"
 REPLAY_MANAGER_IMAGE="prom-replay/replay-manager:e2e"
-GRAFANA_IMAGE="prom-replay/grafana:e2e"
-GRAFANA_DIR="${ROOT_DIR}/grafana"
 
 REPLAY_MANAGER_PORT="${REPLAY_MANAGER_PORT:-18080}"
 VM_PORT="${VM_PORT:-18428}"
@@ -44,12 +42,8 @@ if [ "$SKIP_SETUP" = "false" ]; then
     echo "==> Building replay manager image"
     docker build -t "$REPLAY_MANAGER_IMAGE" "$REPLAY_MANAGER_DIR"
 
-    echo "==> Building custom Grafana image"
-    docker build -t "$GRAFANA_IMAGE" "$GRAFANA_DIR"
-
     echo "==> Loading images into kind"
     kind load docker-image "$REPLAY_MANAGER_IMAGE" --name "$CLUSTER_NAME"
-    kind load docker-image "$GRAFANA_IMAGE" --name "$CLUSTER_NAME"
 
     echo "==> Updating Helm dependencies"
     helm dependency update "$CHART_DIR"
@@ -62,9 +56,6 @@ if [ "$SKIP_SETUP" = "false" ]; then
         --set replayManager.image.repository=prom-replay/replay-manager \
         --set replayManager.image.tag=e2e \
         --set replayManager.image.pullPolicy=Never \
-        --set grafana.image.repository=prom-replay/grafana \
-        --set grafana.image.tag=e2e \
-        --set grafana.image.pullPolicy=Never \
         --set minio.persistence.size=1Gi \
         --wait \
         --timeout 300s
