@@ -108,14 +108,63 @@ curl -X POST http://replay-manager:8080/runs \
 
 ## Configuration
 
-Key values in `values.yaml`:
+### Images
+
+The chart uses four container images:
+
+| Component | Default Image |
+|---|---|
+| Replay Manager | `ghcr.io/rophy/prom-replay/replay-manager:latest` |
+| VictoriaMetrics | `docker.io/victoriametrics/victoria-metrics:v1.106.1` |
+| MinIO | `quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z` |
+| Grafana | `docker.io/grafana/grafana-oss:12.4.3-ubuntu` |
+
+Each image is configured via `<component>.image.registry`, `<component>.image.repository`, and `<component>.image.tag`. To redirect all images to a corporate registry:
+
+```yaml
+global:
+  imageRegistry: registry.corp.example.com
+```
+
+### Key values
 
 | Value | Default | Description |
 |---|---|---|
-| `victoria-metrics-single.server.retentionPeriod` | `30d` | How long loaded runs stay in VM before disk cleanup |
+| `global.imageRegistry` | `""` | Override image registry for all components |
+| `victoriametrics.retentionPeriod` | `30d` | How long loaded runs stay in VM before disk cleanup |
+| `victoriametrics.persistence.size` | `16Gi` | VictoriaMetrics data volume size |
+| `victoriametrics.scrapeConfig` | `{}` | VictoriaMetrics scrape configuration (see below) |
+| `victoriametrics.nodeSelector` | `{}` | Node selector for VictoriaMetrics pods |
 | `minio.persistence.size` | `10Gi` | Storage for archived run exports |
+| `minio.nodeSelector` | `{}` | Node selector for MinIO pods |
+| `grafana.nodeSelector` | `{}` | Node selector for Grafana pods |
+| `replayManager.nodeSelector` | `{}` | Node selector for Replay Manager pods |
 | `dashboards.maxSizeBytes` | `1048576` | Max dashboard JSON size (ConfigMap limit validation) |
-| `grafana.image.repository` | `grafana/grafana` | Grafana image |
+
+### Scrape configuration
+
+To have VictoriaMetrics scrape live metrics, set `victoriametrics.scrapeConfig`. The value is rendered as a ConfigMap and passed via `--promscrape.config`. When set, the chart also creates a ServiceAccount with RBAC permissions for Kubernetes service discovery.
+
+```yaml
+victoriametrics:
+  scrapeConfig:
+    global:
+      scrape_interval: 5s
+    scrape_configs:
+      - job_name: victoriametrics
+        static_configs:
+          - targets: ["localhost:8428"]
+      - job_name: node-exporter
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - source_labels: [__address__]
+            regex: (.+):(.+)
+            target_label: __address__
+            replacement: ${1}:9100
+```
 
 ## Development
 
