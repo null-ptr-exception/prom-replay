@@ -19,6 +19,10 @@ spec:
         app.kubernetes.io/name: {{ include "prom-replay.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: victoriametrics
+      {{- with .Values.victoriametrics.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- if .Values.victoriametrics.scrapeConfig }}
       serviceAccountName: {{ include "prom-replay.fullname" . }}-victoriametrics
@@ -62,6 +66,14 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.victoriametrics.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.victoriametrics.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         {{- if .Values.victoriametrics.scrapeConfig }}
         - name: scrape-config
@@ -73,6 +85,9 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
+        {{- with .Values.victoriametrics.persistence.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
         resources:
           requests:
             storage: {{ .Values.victoriametrics.persistence.size }}

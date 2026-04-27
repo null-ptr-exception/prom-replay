@@ -7,7 +7,11 @@ replayManager:
     repository: rophy/prom-replay/replay-manager
     tag: latest
     pullPolicy: IfNotPresent
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
   nodeSelector: {}
+  affinity: {}
+  tolerations: []
   resources:
     requests:
       memory: 128Mi
@@ -23,10 +27,15 @@ victoriametrics:
     pullPolicy: IfNotPresent
   retentionPeriod: "30d"
   maxUniqueTimeseries: "1000000"
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
   nodeSelector: {}
+  affinity: {}
+  tolerations: []
   scrapeConfig: {}
   persistence:
     size: 16Gi
+    storageClass: ""
   resources:
     requests:
       memory: 256Mi
@@ -42,9 +51,14 @@ minio:
     pullPolicy: IfNotPresent
   rootUser: minioadmin
   rootPassword: minioadmin
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
   nodeSelector: {}
+  affinity: {}
+  tolerations: []
   persistence:
     size: 10Gi
+    storageClass: ""
   resources:
     requests:
       memory: 256Mi
@@ -55,7 +69,14 @@ grafana:
     repository: grafana/grafana-oss
     tag: "12.4.3-ubuntu"
     pullPolicy: IfNotPresent
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
   nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  persistence:
+    size: 1Gi
+    storageClass: ""
   resources:
     requests:
       memory: 128Mi

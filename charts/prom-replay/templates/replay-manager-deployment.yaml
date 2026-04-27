@@ -18,6 +18,10 @@ spec:
         app.kubernetes.io/name: {{ include "prom-replay.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: replay-manager
+      {{- with .Values.replayManager.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       containers:
         - name: replay-manager
@@ -62,5 +66,13 @@ spec:
             {{- toYaml .Values.replayManager.resources | nindent 12 }}
       {{- with .Values.replayManager.nodeSelector }}
       nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.replayManager.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.replayManager.tolerations }}
+      tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

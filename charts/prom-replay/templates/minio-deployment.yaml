@@ -18,6 +18,10 @@ spec:
         app.kubernetes.io/name: {{ include "prom-replay.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: minio
+      {{- with .Values.minio.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       containers:
         - name: minio
@@ -64,6 +68,14 @@ spec:
             {{- toYaml .Values.minio.resources | nindent 12 }}
       {{- with .Values.minio.nodeSelector }}
       nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.minio.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.minio.tolerations }}
+      tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
