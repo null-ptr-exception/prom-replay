@@ -32,6 +32,7 @@ victoriametrics:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  extraArgs: []
   scrapeConfig: {}
   persistence:
     size: 16Gi

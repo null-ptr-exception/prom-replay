@@ -37,6 +37,9 @@ spec:
             {{- if .Values.victoriametrics.scrapeConfig }}
             - --promscrape.config=/etc/victoriametrics/scrape.yaml
             {{- end }}
+            {{- range .Values.victoriametrics.extraArgs }}
+            - {{ . }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 8428
