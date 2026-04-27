@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "prom-replay.fullname" . }}-minio
   labels:
     {{- include "prom-replay.labels" . | nindent 4 }}
     app.kubernetes.io/component: minio
 spec:
+  serviceName: {{ include "prom-replay.fullname" . }}-minio
   replicas: 1
   selector:
     matchLabels:
@@ -78,7 +79,14 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: {{ include "prom-replay.fullname" . }}-minio
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.minio.persistence.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.minio.persistence.size }}

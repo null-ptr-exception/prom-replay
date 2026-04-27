@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "prom-replay.fullname" . }}-grafana
   labels:
     {{- include "prom-replay.labels" . | nindent 4 }}
     app.kubernetes.io/component: grafana
 spec:
+  serviceName: {{ include "prom-replay.fullname" . }}-grafana
   replicas: 1
   selector:
     matchLabels:
@@ -84,9 +85,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: {{ include "prom-replay.fullname" . }}-grafana
         - name: datasources
           configMap:
             name: {{ include "prom-replay.fullname" . }}-grafana-datasource
@@ -101,3 +99,14 @@ spec:
         {{- with .Values.grafana.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.grafana.persistence.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.grafana.persistence.size }}
