@@ -19,6 +19,12 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
 
+      - name: Install helm-unittest
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
+
+      - name: Run unit tests
+        run: helm unittest ${{ env.CHART_PATH }}
+
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
