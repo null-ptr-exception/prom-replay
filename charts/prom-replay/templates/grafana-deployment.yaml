@@ -26,6 +26,7 @@ spec:
     spec:
       securityContext:
         fsGroup: 472
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: grafana
           image: {{ include "prom-replay.image" (dict "imageValues" .Values.grafana.image "global" .Values.global) }}
