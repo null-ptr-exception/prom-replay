@@ -28,6 +28,15 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
+      - name: Check version not already published
+        run: |
+          VERSION=$(grep '^version:' ${{ env.CHART_PATH }}/Chart.yaml | awk '{print $2}')
+          if helm pull oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/prom-replay/charts/prom-replay --version "$VERSION" -d /tmp 2>/dev/null; then
+            echo "::error::Chart version $VERSION already exists in registry. Bump the version in Chart.yaml before publishing."
+            exit 1
+          fi
+          echo "Version $VERSION is available"
+
       - name: Package chart
         run: helm package ${{ env.CHART_PATH }} -d /tmp/charts
 
