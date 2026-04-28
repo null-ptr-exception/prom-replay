@@ -1,0 +1,89 @@
+suite: grafana
+templates:
+  - grafana-deployment.yaml
+tests:
+  - it: should be a StatefulSet
+    asserts:
+      - isKind:
+          of: StatefulSet
+
+  - it: should set fsGroup for PVC permissions
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 472
+
+  - it: should set fsGroupChangePolicy to OnRootMismatch
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: OnRootMismatch
+
+  - it: should have volumeClaimTemplates for data
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+
+  - it: should set GF_PATHS_DATA matching the data volume mount
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: GF_PATHS_DATA
+            value: /var/lib/grafana
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: data
+            mountPath: /var/lib/grafana
+
+  - it: should support custom storageClass
+    set:
+      grafana.persistence.storageClass: fast-ssd
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: fast-ssd
+
+  - it: should render podAnnotations
+    asserts:
+      - isNotEmpty:
+          path: spec.template.metadata.annotations
+
+  - it: should support nodeSelector
+    set:
+      grafana.nodeSelector:
+        role: infra
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.role
+          value: infra
+
+  - it: should support tolerations
+    set:
+      grafana.tolerations:
+        - key: node-role
+          operator: Exists
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: node-role
+            operator: Exists
+            effect: NoSchedule
+
+  - it: should support affinity
+    set:
+      grafana.affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: In
+                    values: [infra]
+    asserts:
+      - exists:
+          path: spec.template.spec.affinity.nodeAffinity

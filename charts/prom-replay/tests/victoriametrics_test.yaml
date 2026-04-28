@@ -1,0 +1,88 @@
+suite: victoriametrics
+templates:
+  - victoriametrics-deployment.yaml
+tests:
+  - it: should be a StatefulSet
+    asserts:
+      - isKind:
+          of: StatefulSet
+
+  - it: should have volumeClaimTemplates for data
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+
+  - it: should support custom storageClass
+    set:
+      victoriametrics.persistence.storageClass: fast-ssd
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: fast-ssd
+
+  - it: should render podAnnotations
+    asserts:
+      - isNotEmpty:
+          path: spec.template.metadata.annotations
+
+  - it: should support nodeSelector
+    set:
+      victoriametrics.nodeSelector:
+        role: master
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.role
+          value: master
+
+  - it: should support tolerations
+    set:
+      victoriametrics.tolerations:
+        - key: node-role
+          operator: Exists
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: node-role
+            operator: Exists
+            effect: NoSchedule
+
+  - it: should support extraArgs
+    set:
+      victoriametrics.extraArgs:
+        - --enableMetadata
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --enableMetadata
+
+  - it: should enable scrape config when set
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --promscrape.config=/etc/victoriametrics/scrape.yaml
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: scrape-config
+            mountPath: /etc/victoriametrics
+
+  - it: should set serviceAccountName when scrapeConfig is set
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.serviceAccountName
+
+  - it: should not set serviceAccountName without scrapeConfig
+    asserts:
+      - notExists:
+          path: spec.template.spec.serviceAccountName

@@ -1,0 +1,50 @@
+suite: minio
+templates:
+  - minio-deployment.yaml
+tests:
+  - it: should be a StatefulSet
+    asserts:
+      - isKind:
+          of: StatefulSet
+
+  - it: should have volumeClaimTemplates for data
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+
+  - it: should support custom storageClass
+    set:
+      minio.persistence.storageClass: fast-ssd
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: fast-ssd
+
+  - it: should render podAnnotations
+    asserts:
+      - isNotEmpty:
+          path: spec.template.metadata.annotations
+
+  - it: should support nodeSelector
+    set:
+      minio.nodeSelector:
+        role: master
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.role
+          value: master
+
+  - it: should support tolerations
+    set:
+      minio.tolerations:
+        - key: node-role
+          operator: Exists
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: node-role
+            operator: Exists
+            effect: NoSchedule

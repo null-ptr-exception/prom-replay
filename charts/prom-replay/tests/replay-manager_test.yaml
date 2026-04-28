@@ -1,0 +1,36 @@
+suite: replay-manager
+templates:
+  - replay-manager-deployment.yaml
+tests:
+  - it: should be a Deployment
+    asserts:
+      - isKind:
+          of: Deployment
+
+  - it: should render podAnnotations
+    asserts:
+      - isNotEmpty:
+          path: spec.template.metadata.annotations
+
+  - it: should support nodeSelector
+    set:
+      replayManager.nodeSelector:
+        role: infra
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.role
+          value: infra
+
+  - it: should support tolerations
+    set:
+      replayManager.tolerations:
+        - key: node-role
+          operator: Exists
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: node-role
+            operator: Exists
+            effect: NoSchedule

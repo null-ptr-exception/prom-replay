@@ -44,6 +44,8 @@ spec:
               value: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
             - name: GF_SERVER_SERVE_FROM_SUB_PATH
               value: "true"
+            - name: GF_PATHS_DATA
+              value: /var/lib/grafana
           volumeMounts:
             - name: data
               mountPath: /var/lib/grafana
