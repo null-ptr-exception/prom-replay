@@ -24,9 +24,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      {{- if .Values.victoriametrics.scrapeConfig }}
       serviceAccountName: {{ include "prom-replay.fullname" . }}-victoriametrics
-      {{- end }}
       containers:
         - name: victoriametrics
           image: {{ include "prom-replay.image" (dict "imageValues" .Values.victoriametrics.image "global" .Values.global) }}

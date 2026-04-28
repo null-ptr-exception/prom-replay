@@ -33,6 +33,7 @@ victoriametrics:
   affinity: {}
   tolerations: []
   scrapeConfig: {}
+  enableRBAC: true
   persistence:
     size: 16Gi
     storageClass: ""
