@@ -33,6 +33,8 @@ victoriametrics:
   affinity: {}
   tolerations: []
   extraArgs: []
+  rbac:
+    clusterWide: false
   scrapeConfig: {}
   persistence:
     size: 16Gi
