@@ -1,0 +1,68 @@
+suite: victoriametrics-rbac
+templates:
+  - victoriametrics-rbac.yaml
+tests:
+  - it: should not create any RBAC resources without scrapeConfig
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should create namespaced Role by default when scrapeConfig is set
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: ServiceAccount
+        documentIndex: 0
+      - isKind:
+          of: Role
+        documentIndex: 1
+      - isKind:
+          of: RoleBinding
+        documentIndex: 2
+
+  - it: should only grant namespace-scoped permissions in Role
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: rules[0].resources
+          value: [pods, services, endpoints]
+
+  - it: should create ClusterRole when rbac.clusterWide is true
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+      victoriametrics.rbac.clusterWide: true
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: ServiceAccount
+        documentIndex: 0
+      - isKind:
+          of: ClusterRole
+        documentIndex: 1
+      - isKind:
+          of: ClusterRoleBinding
+        documentIndex: 2
+
+  - it: should include node permissions in ClusterRole
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+      victoriametrics.rbac.clusterWide: true
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: rules[0].resources
+          content: nodes

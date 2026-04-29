@@ -7,6 +7,7 @@ metadata:
     {{- include "prom-replay.labels" . | nindent 4 }}
     app.kubernetes.io/component: victoriametrics
 ---
+{{- if .Values.victoriametrics.rbac.clusterWide }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -39,4 +40,33 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "prom-replay.fullname" . }}-victoriametrics
     namespace: {{ .Release.Namespace }}
+{{- else }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "prom-replay.fullname" . }}-victoriametrics
+  labels:
+    {{- include "prom-replay.labels" . | nindent 4 }}
+    app.kubernetes.io/component: victoriametrics
+rules:
+  - apiGroups: [""]
+    resources: [pods, services, endpoints]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "prom-replay.fullname" . }}-victoriametrics
+  labels:
+    {{- include "prom-replay.labels" . | nindent 4 }}
+    app.kubernetes.io/component: victoriametrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "prom-replay.fullname" . }}-victoriametrics
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "prom-replay.fullname" . }}-victoriametrics
+    namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}
