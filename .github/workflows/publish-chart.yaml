@@ -1,6 +1,13 @@
-name: Publish Helm Chart
+name: Helm Chart
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - charts/**
+  pull_request:
+    paths:
+      - charts/**
   workflow_dispatch:
 
 env:
@@ -8,11 +15,8 @@ env:
   CHART_PATH: charts/prom-replay
 
 jobs:
-  publish:
+  test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -24,6 +28,19 @@ jobs:
 
       - name: Run unit tests
         run: helm unittest ${{ env.CHART_PATH }}
+
+  publish:
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
