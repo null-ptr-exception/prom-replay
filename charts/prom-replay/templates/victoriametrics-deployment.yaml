@@ -23,7 +23,7 @@ spec:
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-     {{- if .Values.victoriametrics.scrapeConfig } 
+     {{- if .Values.victoriametrics.scrapeConfig }}
      annotations: 
        scrape-config-checksum: {{ toYaml .Values.victoriametrics.scrapeConfig | sha256sum | quote }}
      {{- end }}
