@@ -22,12 +22,12 @@ spec:
      {{- if or .Values.victoriametrics.podAnnotations .Values.victoriametrics.scrapeConfig }}
       annotations:
         {{- with .Values.victoriametrics.podAnnotations }}
-        {- toYaml . | nindent 8 }}
- {      {{- end }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- if .Values.victoriametrics.scrapeConfig }}
         scrape-config-checksum: {{ toYaml .Values.victoriametrics.scrapeConfig | sha256sum | quote }}
         {{- end }}
-     {- end }}
+     {{- end }}
      {{- if .Values.victoriametrics.scrapeConfig }}
      annotations: 
        scrape-config-checksum: {{ toYaml .Values.victoriametrics.scrapeConfig | sha256sum | quote }}
