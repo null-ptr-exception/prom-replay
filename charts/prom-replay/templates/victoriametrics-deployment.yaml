@@ -19,10 +19,15 @@ spec:
         app.kubernetes.io/name: {{ include "prom-replay.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: victoriametrics
-      {{- with .Values.victoriametrics.podAnnotations }}
+     {{- if or .Values.victoriametrics.podAnnotations .Values.victoriametrics.scrapeConfig }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- with .Values.victoriametrics.podAnnotations }}
+        {- toYaml . | nindent 8 }}
+ {      {{- end }}
+        {{- if .Values.victoriametrics.scrapeConfig }}
+        scrape-config-checksum: {{ toYaml .Values.victoriametrics.scrapeConfig | sha256sum | quote }}
+        {{- end }}
+     {- end }}
      {{- if .Values.victoriametrics.scrapeConfig }}
      annotations: 
        scrape-config-checksum: {{ toYaml .Values.victoriametrics.scrapeConfig | sha256sum | quote }}
