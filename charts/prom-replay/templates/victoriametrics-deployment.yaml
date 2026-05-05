@@ -28,10 +28,6 @@ spec:
         scrape-config-checksum: {{ toYaml .Values.victoriametrics.scrapeConfig | sha256sum | quote }}
         {{- end }}
      {{- end }}
-     {{- if .Values.victoriametrics.scrapeConfig }}
-     annotations: 
-       scrape-config-checksum: {{ toYaml .Values.victoriametrics.scrapeConfig | sha256sum | quote }}
-     {{- end }}
     spec:
       {{- if .Values.victoriametrics.scrapeConfig }}
       serviceAccountName: {{ include "prom-replay.fullname" . }}-victoriametrics
