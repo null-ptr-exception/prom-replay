@@ -73,16 +73,25 @@ tests:
             name: scrape-config
             mountPath: /etc/victoriametrics
 
-  - it: should set serviceAccountName when scrapeConfig is set
-    set:
-      victoriametrics.scrapeConfig:
-        global:
-          scrape_interval: 5s
+  - it: should set serviceAccountName by default
     asserts:
-      - isNotEmpty:
+      - equal:
           path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-prom-replay-victoriametrics
 
-  - it: should not set serviceAccountName without scrapeConfig
+  - it: should use custom serviceAccountName when provided
+    set:
+      victoriametrics.serviceAccount.create: false
+      victoriametrics.serviceAccount.name: custom-sa
     asserts:
-      - notExists:
+      - equal:
           path: spec.template.spec.serviceAccountName
+          value: custom-sa
+
+  - it: should default to 'default' when create is false and no name provided
+    set:
+      victoriametrics.serviceAccount.create: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: default
