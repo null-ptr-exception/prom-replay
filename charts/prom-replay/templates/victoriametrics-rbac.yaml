@@ -1,12 +1,18 @@
-{{- if .Values.victoriametrics.scrapeConfig }}
+{{- if .Values.victoriametrics.serviceAccount.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "prom-replay.fullname" . }}-victoriametrics
+  name: {{ include "prom-replay.victoriametrics.serviceAccountName" . }}
   labels:
     {{- include "prom-replay.labels" . | nindent 4 }}
     app.kubernetes.io/component: victoriametrics
+  {{- with .Values.victoriametrics.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 ---
+{{- end }}
+{{- if .Values.victoriametrics.scrapeConfig }}
 {{- if .Values.victoriametrics.rbac.clusterWide }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -38,8 +44,9 @@ roleRef:
   name: {{ include "prom-replay.fullname" . }}-victoriametrics
 subjects:
   - kind: ServiceAccount
-    name: {{ include "prom-replay.fullname" . }}-victoriametrics
+    name: {{ include "prom-replay.victoriametrics.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
+---
 {{- else }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -66,7 +73,7 @@ roleRef:
   name: {{ include "prom-replay.fullname" . }}-victoriametrics
 subjects:
   - kind: ServiceAccount
-    name: {{ include "prom-replay.fullname" . }}-victoriametrics
+    name: {{ include "prom-replay.victoriametrics.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
 {{- end }}

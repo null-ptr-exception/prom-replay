@@ -29,9 +29,7 @@ spec:
         {{- end }}
      {{- end }}
     spec:
-      {{- if .Values.victoriametrics.scrapeConfig }}
-      serviceAccountName: {{ include "prom-replay.fullname" . }}-victoriametrics
-      {{- end }}
+      serviceAccountName: {{ include "prom-replay.victoriametrics.serviceAccountName" . }}
       containers:
         - name: victoriametrics
           image: {{ include "prom-replay.image" (dict "imageValues" .Values.victoriametrics.image "global" .Values.global) }}

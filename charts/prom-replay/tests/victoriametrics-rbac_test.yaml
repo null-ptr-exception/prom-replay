@@ -2,10 +2,26 @@ suite: victoriametrics-rbac
 templates:
   - victoriametrics-rbac.yaml
 tests:
-  - it: should not create any RBAC resources without scrapeConfig
+  - it: should create ServiceAccount by default
     asserts:
-      - hasDocuments:
-          count: 0
+      - isKind:
+          of: ServiceAccount
+
+  - it: should not create ServiceAccount when create is false
+    set:
+      victoriametrics.serviceAccount.create: false
+    asserts:
+      - notExists:
+          kind: ServiceAccount
+
+  - it: should add annotations to ServiceAccount
+    set:
+      victoriametrics.serviceAccount.annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/vm-role
+    asserts:
+      - equal:
+          path: metadata.annotations["eks.amazonaws.com/role-arn"]
+          value: arn:aws:iam::123456789012:role/vm-role
 
   - it: should create namespaced Role by default when scrapeConfig is set
     set:
@@ -66,3 +82,26 @@ tests:
       - contains:
           path: rules[0].resources
           content: nodes
+
+  - it: should use the correct serviceAccountName in RoleBinding
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+      victoriametrics.serviceAccount.name: custom-sa
+    documentIndex: 2
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: custom-sa
+
+  - it: should use default generated serviceAccountName in RoleBinding
+    set:
+      victoriametrics.scrapeConfig:
+        global:
+          scrape_interval: 5s
+    documentIndex: 2
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: RELEASE-NAME-prom-replay-victoriametrics
