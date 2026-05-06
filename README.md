@@ -134,6 +134,9 @@ global:
 | `victoriametrics.retentionPeriod` | `30d` | How long loaded runs stay in VM before disk cleanup |
 | `victoriametrics.persistence.size` | `16Gi` | VictoriaMetrics data volume size |
 | `victoriametrics.scrapeConfig` | `{}` | VictoriaMetrics scrape configuration (see below) |
+| `victoriametrics.serviceAccount.create` | `true` | Whether to create a ServiceAccount for VictoriaMetrics |
+| `victoriametrics.serviceAccount.name` | `""` | Existing ServiceAccount name to use (if create is false) |
+| `victoriametrics.serviceAccount.annotations` | `{}` | Annotations to add to the ServiceAccount |
 | `victoriametrics.nodeSelector` | `{}` | Node selector for VictoriaMetrics pods |
 | `minio.persistence.size` | `10Gi` | Storage for archived run exports |
 | `minio.nodeSelector` | `{}` | Node selector for MinIO pods |
@@ -143,7 +146,7 @@ global:
 
 ### Scrape configuration
 
-To have VictoriaMetrics scrape live metrics, set `victoriametrics.scrapeConfig`. The value is rendered as a ConfigMap and passed via `--promscrape.config`. When set, the chart also creates a ServiceAccount with RBAC permissions for Kubernetes service discovery.
+To have VictoriaMetrics scrape live metrics, set `victoriametrics.scrapeConfig`. The value is rendered as a ConfigMap and passed via `--promscrape.config`. When set, the chart uses a ServiceAccount with RBAC permissions for Kubernetes service discovery (automatically created by default).
 
 ```yaml
 victoriametrics:
