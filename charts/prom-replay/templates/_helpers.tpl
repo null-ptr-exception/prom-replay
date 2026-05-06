@@ -38,3 +38,14 @@ http://{{ include "prom-replay.fullname" . }}-victoriametrics:8428
 {{- define "prom-replay.minioEndpoint" -}}
 {{ include "prom-replay.fullname" . }}-minio:9000
 {{- end }}
+
+{{/*
+Create the name of the service account to use for VictoriaMetrics
+*/}}
+{{- define "prom-replay.victoriametrics.serviceAccountName" -}}
+{{- if .Values.victoriametrics.serviceAccount.create -}}
+    {{- default (printf "%s-victoriametrics" (include "prom-replay.fullname" .)) .Values.victoriametrics.serviceAccount.name -}}
+{{- else -}}
+    {{- default "default" .Values.victoriametrics.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}
